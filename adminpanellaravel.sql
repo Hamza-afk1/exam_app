@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le : jeu. 16 jan. 2025 à 18:56
+-- Généré le : jeu. 16 jan. 2025 à 20:07
 -- Version du serveur : 10.4.32-MariaDB
 -- Version de PHP : 8.0.30
 
@@ -116,7 +116,8 @@ CREATE TABLE `formateurs` (
 --
 
 INSERT INTO `formateurs` (`id`, `name`, `prenom`, `email`, `role`, `password`, `picture`, `created_at`, `updated_at`) VALUES
-(1, 'Hamza', 'bohali', 'Hamza@gmail.com', 'formateur', '$2y$10$r3I2k6jtW660T4f.K.NmduM/W77wMOEA4DzbI7a1R14zogFmPhlEC', NULL, '2025-01-16 13:37:35', '2025-01-16 13:37:35');
+(1, 'Hamza', 'bohali', 'Hamza@gmail.com', 'formateur', '$2y$10$r3I2k6jtW660T4f.K.NmduM/W77wMOEA4DzbI7a1R14zogFmPhlEC', NULL, '2025-01-16 13:37:35', '2025-01-16 13:37:35'),
+(2, 'lhyanni', 'Issam', 'lhyanni@gmail.com', 'formateur', '$2y$10$aHoMjNScStir.TBJkVxkVeEKlWBtyoQCIBBTYpcSmKmtf/0x5VNIS', NULL, '2025-01-16 17:09:40', '2025-01-16 17:09:40');
 
 -- --------------------------------------------------------
 
@@ -197,8 +198,17 @@ CREATE TABLE `stagiaires` (
   `email` varchar(255) NOT NULL,
   `prenom` varchar(255) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `groupe` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `stagiaires`
+--
+
+INSERT INTO `stagiaires` (`id`, `name`, `email`, `prenom`, `created_at`, `updated_at`, `groupe`, `password`) VALUES
+(1, 'Hamza', 'Hamza@gmail.com', 'Issam', '2025-01-16 18:04:50', '2025-01-16 18:04:50', 'DD101', '$2y$10$wypu9Gze8EZ6imr7Bv7y..pc6Qracj89zanUnlgXbTw.kFG4UejlC');
 
 -- --------------------------------------------------------
 
@@ -305,7 +315,7 @@ ALTER TABLE `examens`
 -- AUTO_INCREMENT pour la table `formateurs`
 --
 ALTER TABLE `formateurs`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT pour la table `groupes`
@@ -329,7 +339,7 @@ ALTER TABLE `questions`
 -- AUTO_INCREMENT pour la table `stagiaires`
 --
 ALTER TABLE `stagiaires`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT pour la table `users`
@@ -357,3 +367,4 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
