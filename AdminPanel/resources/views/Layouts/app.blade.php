@@ -5,7 +5,7 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Skydash Admin</title>
+    <title>Online Exam</title>
     <!-- plugins:css -->
     <link rel="stylesheet" href="/vendors/feather/feather.css">
     <link rel="stylesheet" href="/vendors/ti-icons/css/themify-icons.css">
@@ -34,10 +34,17 @@
         <!-- partial:partials/_navbar.html  headd -->
         <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
             <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
-                <a class="navbar-brand brand-logo mr-5" href="index.html"><img src="/images/logo.svg" class="mr-2"
-                        alt="logo" /></a>
-                <a class="navbar-brand brand-logo-mini" href="index.html"><img src="/images/logo-mini.svg"
-                        alt="logo" /></a>
+            <a class="navbar-brand brand-logo mr-5" href="{{ route('admin.dashboard') }}">
+                <div class="logo-container" style="display: flex; align-items: center;">
+                    <i class="ti-write mr-2" style="font-size: 24px; color: #4CAF50;"></i>
+                    <span style="font-size: 20px; font-weight: bold; background: linear-gradient(45deg, #4CAF50, #2196F3); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        ExamOnline
+                    </span>
+                </div>
+            </a>
+            <a class="navbar-brand brand-logo-mini" href="{{ route('admin.dashboard') }}">
+                <i class="ti-write" style="font-size: 24px; color: #4CAF50;"></i>
+            </a>
             </div>
             <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
                 <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
@@ -57,6 +64,11 @@
                     </li>
                 </ul>
                 <ul class="navbar-nav navbar-nav-right">
+                    <li class="nav-item">
+                        <button id="darkModeToggle" class="btn" style="margin-right: 15px;">
+                            <i class="ti-light-bulb" style="font-size: 1.2rem;"></i>
+                        </button>
+                    </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link count-indicator dropdown-toggle" id="notificationDropdown" href="#"
                             data-toggle="dropdown">
@@ -109,10 +121,24 @@
                     </li>
                     <li class="nav-item nav-profile dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" id="profileDropdown">
-                            @if (isset($LoggedAdminInfo) && $LoggedAdminInfo->picture)
-                                <img src="{{ asset('storage/' . $LoggedAdminInfo->picture) }}">
+                            @php
+                                $admin = session('LoggedAdminInfo');
+                                $hasPicture = false;
+                                $picturePath = '';
+                                
+                                if (is_object($admin)) {
+                                    $hasPicture = !empty($admin->picture);
+                                    $picturePath = $admin->picture ?? '';
+                                } elseif (is_array($admin)) {
+                                    $hasPicture = !empty($admin['picture']);
+                                    $picturePath = $admin['picture'] ?? '';
+                                }
+                            @endphp
+
+                            @if ($hasPicture)
+                                <img src="{{ asset('storage/' . $picturePath) }}" alt="Profile">
                             @else
-                                <p>Admin Picture not available</p>
+                                <img src="{{ asset('images/default-avatar.png') }}" alt="Default Profile">
                             @endif
                         </a>
                         
@@ -123,16 +149,14 @@
                                 Settings
                             </a>
                             <form action="{{ route('admin.logout') }}" method="POST">
-  @csrf
-    <button type="submit" class="dropdown-item">
-        <i class="ti-power-off text-primary"></i>
-        Logout
-    </button>
-</form>
-
-</div> 
-
-        </li>
+                                @csrf
+                                <button type="submit" class="dropdown-item">
+                                    <i class="ti-power-off text-primary"></i>
+                                    Logout
+                                </button>
+                            </form>
+                        </div>
+                    </li>
                      <li class="nav-item nav-settings d-none d-lg-flex">
                         <a class="nav-link" href="#">
                             <i class="icon-ellipsis"></i>
@@ -371,19 +395,20 @@
                     
 
                     <li class="nav-item">
-                        <a class="nav-link" data-toggle="collapse" href="#charts" aria-expanded="false"
-                            aria-controls="charts">
-                            <i class="icon-bar-graph menu-icon"></i>
-                            <span class="menu-title">Charts</span>
-                            <i class="menu-arrow"></i>
-                        </a>
-                        <div class="collapse" id="charts">
-                            <ul class="nav flex-column sub-menu">
-                                <li class="nav-item"> <a class="nav-link" href="pages/charts/chartjs.html">ChartJs</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
+    <a class="nav-link" data-toggle="collapse" href="#charts" aria-expanded="false" aria-controls="charts">
+        <i class="icon-bar-graph menu-icon"></i>
+        <span class="menu-title">Charts</span>
+        <i class="menu-arrow"></i>
+    </a>
+    <div class="collapse" id="charts">
+        <ul class="nav flex-column sub-menu">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('charts') }}">ChartJs</a>
+            </li>
+        </ul>
+    </div>
+</li>
+
 
                     <!-- Add stagiaire ici -->
                     <li class="nav-item">
@@ -547,6 +572,518 @@
     <script src="/js/dashboard.js"></script>
     <script src="/js/Chart.roundedBarCharts.js"></script>
     <!-- End custom js for this page-->
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+        
+        // Check for saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            body.classList.add('dark-mode');
+            darkModeToggle.innerHTML = '<i class="ti-light-bulb" style="font-size: 1.2rem; color: #ffd700;"></i>';
+        }
+
+        // Toggle dark mode
+        darkModeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            
+            // Save preference
+            if (body.classList.contains('dark-mode')) {
+                localStorage.setItem('darkMode', 'enabled');
+                darkModeToggle.innerHTML = '<i class="ti-light-bulb" style="font-size: 1.2rem; color: #ffd700;"></i>';
+            } else {
+                localStorage.setItem('darkMode', null);
+                darkModeToggle.innerHTML = '<i class="ti-light-bulb" style="font-size: 1.2rem;"></i>';
+            }
+        });
+    });
+    </script>
+
+    <style>
+    /* Base dark mode styles */
+    body.dark-mode {
+        background-color: #1a1a1a !important;
+        color: #e4e4e4 !important;
+    }
+
+    /* Main wrapper styles */
+    body.dark-mode .container-scroller {
+        background-color: #1a1a1a !important;
+    }
+
+    /* Navbar styles */
+    body.dark-mode .navbar {
+        background-color: #2d2d2d !important;
+        border-bottom: 1px solid #3d3d3d !important;
+    }
+
+    body.dark-mode .navbar .navbar-brand-wrapper {
+        background-color: #2d2d2d !important;
+        border-right: 1px solid #3d3d3d !important;
+    }
+
+    body.dark-mode .navbar .navbar-menu-wrapper {
+        background-color: #2d2d2d !important;
+    }
+
+    /* Sidebar styles */
+    body.dark-mode .sidebar {
+        background-color: #2d2d2d !important;
+        border-right: 1px solid #3d3d3d !important;
+    }
+
+    body.dark-mode .sidebar .nav .nav-item .nav-link {
+        color: #e4e4e4 !important;
+    }
+
+    body.dark-mode .sidebar .nav .nav-item.active .nav-link {
+        background: #3d3d3d !important;
+    }
+
+    body.dark-mode .sidebar .nav .nav-item .nav-link i {
+        color: #e4e4e4 !important;
+    }
+
+    /* Main panel styles */
+    body.dark-mode .main-panel {
+        background-color: #1a1a1a !important;
+    }
+
+    body.dark-mode .content-wrapper {
+        background-color: #1a1a1a !important;
+    }
+
+    /* Footer styles */
+    body.dark-mode footer {
+        background-color: #2d2d2d !important;
+        border-top: 1px solid #3d3d3d !important;
+    }
+
+    /* Card styles */
+    body.dark-mode .card:not(.card-tale):not(.card-dark-blue):not(.card-light-blue):not(.card-light-danger) {
+        background-color: #2d2d2d !important;
+        border: 1px solid #3d3d3d !important;
+    }
+
+    /* Text colors */
+    body.dark-mode .text-black,
+    body.dark-mode .text-dark {
+        color: #e4e4e4 !important;
+    }
+
+    /* Form elements */
+    body.dark-mode input,
+    body.dark-mode select,
+    body.dark-mode textarea {
+        background-color: #2d2d2d !important;
+        color: #e4e4e4 !important;
+        border: 1px solid #3d3d3d !important;
+    }
+
+    /* Dropdown menus */
+    body.dark-mode .dropdown-menu {
+        background-color: #2d2d2d !important;
+        border: 1px solid #3d3d3d !important;
+    }
+
+    body.dark-mode .dropdown-item {
+        color: #e4e4e4 !important;
+    }
+
+    body.dark-mode .dropdown-item:hover {
+        background-color: #3d3d3d !important;
+    }
+
+    /* Table styles */
+    body.dark-mode .table {
+        color: #e4e4e4 !important;
+    }
+
+    body.dark-mode .table thead th {
+        background-color: #3d3d3d !important;
+        color: #e4e4e4 !important;
+        border-color: #4d4d4d !important;
+    }
+
+    body.dark-mode .table td,
+    body.dark-mode .table th {
+        border-color: #4d4d4d !important;
+        color: #e4e4e4 !important;
+    }
+
+    /* Settings panel */
+    body.dark-mode .settings-panel {
+        background-color: #2d2d2d !important;
+        border-left: 1px solid #3d3d3d !important;
+    }
+
+    /* Modal styles */
+    body.dark-mode .modal-content {
+        background-color: #2d2d2d !important;
+        color: #e4e4e4 !important;
+    }
+
+    /* Breadcrumb */
+    body.dark-mode .page-title-wrapper {
+        background-color: #2d2d2d !important;
+    }
+
+    /* Links */
+    body.dark-mode a:not(.btn) {
+        color: #45B6FE !important;
+    }
+
+    body.dark-mode a:not(.btn):hover {
+        color: #2196F3 !important;
+    }
+
+    /* Ensure all headings are visible */
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode h6 {
+        color: #e4e4e4 !important;
+    }
+
+    /* Navigation active states */
+    body.dark-mode .nav-item.active > .nav-link {
+        background-color: #3d3d3d !important;
+    }
+
+    /* Ensure proper transitions */
+    body *,
+    .navbar,
+    .sidebar,
+    .content-wrapper,
+    .main-panel,
+    .card,
+    .table,
+    .dropdown-menu {
+        transition: all 0.3s ease !important;
+    }
+
+    /* Keep all existing styles and update/add only these card styles */
+
+    /* Statistics Cards - Consistent colors for both light and dark modes */
+    .card.card-tale,
+    body.dark-mode .card.card-tale {
+        background: linear-gradient(45deg, #7978e9, #4747A1) !important;
+        border: none !important;
+        box-shadow: 0 2px 10px rgba(71, 71, 161, 0.3) !important;
+    }
+
+    .card.card-dark-blue,
+    body.dark-mode .card.card-dark-blue {
+        background: linear-gradient(45deg, #47b3ff, #2196F3) !important;
+        border: none !important;
+        box-shadow: 0 2px 10px rgba(33, 150, 243, 0.3) !important;
+    }
+
+    .card.card-light-blue,
+    body.dark-mode .card.card-light-blue {
+        background: linear-gradient(45deg, #66bb6a, #43a047) !important;
+        border: none !important;
+        box-shadow: 0 2px 10px rgba(76, 175, 80, 0.3) !important;
+    }
+
+    .card.card-light-danger,
+    body.dark-mode .card.card-light-danger {
+        background: linear-gradient(45deg, #ff6b6b, #f44336) !important;
+        border: none !important;
+        box-shadow: 0 2px 10px rgba(244, 67, 54, 0.3) !important;
+    }
+
+    /* Ensure text in cards is always white and visible */
+    .card.card-tale *,
+    .card.card-dark-blue *,
+    .card.card-light-blue *,
+    .card.card-light-danger *,
+    body.dark-mode .card.card-tale *,
+    body.dark-mode .card.card-dark-blue *,
+    body.dark-mode .card.card-light-blue *,
+    body.dark-mode .card.card-light-danger * {
+        color: #ffffff !important;
+    }
+
+    /* Card hover effects */
+    .card.card-tale:hover,
+    .card.card-dark-blue:hover,
+    .card.card-light-blue:hover,
+    .card.card-light-danger:hover,
+    body.dark-mode .card.card-tale:hover,
+    body.dark-mode .card.card-dark-blue:hover,
+    body.dark-mode .card.card-light-blue:hover,
+    body.dark-mode .card.card-light-danger:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3) !important;
+    }
+
+    /* Ensure card body stays transparent */
+    .card.card-tale .card-body,
+    .card.card-dark-blue .card-body,
+    .card.card-light-blue .card-body,
+    .card.card-light-danger .card-body,
+    body.dark-mode .card.card-tale .card-body,
+    body.dark-mode .card.card-dark-blue .card-body,
+    body.dark-mode .card.card-light-blue .card-body,
+    body.dark-mode .card.card-light-danger .card-body {
+        background: transparent !important;
+    }
+
+    /* Card text styles */
+    .card .fs-30,
+    body.dark-mode .card .fs-30 {
+        font-size: 2rem !important;
+        font-weight: 600 !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    .card .mb-4,
+    body.dark-mode .card .mb-4 {
+        font-size: 1.1rem !important;
+        font-weight: 400 !important;
+    }
+
+    /* Enhanced Table Styles for ALL tables */
+    body.dark-mode table,
+    body.dark-mode .table,
+    body.dark-mode .datatable,
+    body.dark-mode .dataTable,
+    body.dark-mode .table-bordered,
+    body.dark-mode .table-responsive {
+        background-color: #2d2d2d !important;
+        color: #e4e4e4 !important;
+    }
+
+    body.dark-mode table th,
+    body.dark-mode table td,
+    body.dark-mode .table th,
+    body.dark-mode .table td {
+        background-color: #2d2d2d !important;
+        color: #e4e4e4 !important;
+        border-color: #3d3d3d !important;
+    }
+
+    body.dark-mode table thead th,
+    body.dark-mode .table thead th {
+        background-color: #3d3d3d !important;
+        color: #ffffff !important;
+        border-bottom: 2px solid #4d4d4d !important;
+    }
+
+    /* Table striping */
+    body.dark-mode .table-striped tbody tr:nth-of-type(odd) {
+        background-color: #262626 !important;
+    }
+
+    body.dark-mode .table-hover tbody tr:hover {
+        background-color: #363636 !important;
+        color: #ffffff !important;
+    }
+
+    /* Comprehensive Text Color Fixes */
+    body.dark-mode *:not(.btn):not(.card-tale *):not(.card-dark-blue *):not(.card-light-blue *):not(.card-light-danger *) {
+        color: #e4e4e4 !important;
+    }
+
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode h6,
+    body.dark-mode p,
+    body.dark-mode span,
+    body.dark-mode label,
+    body.dark-mode div,
+    body.dark-mode td,
+    body.dark-mode th,
+    body.dark-mode li,
+    body.dark-mode input,
+    body.dark-mode select,
+    body.dark-mode textarea {
+        color: #e4e4e4 !important;
+    }
+
+    /* Form Elements */
+    body.dark-mode input,
+    body.dark-mode select,
+    body.dark-mode textarea,
+    body.dark-mode .form-control {
+        background-color: #2d2d2d !important;
+        color: #e4e4e4 !important;
+        border-color: #3d3d3d !important;
+    }
+
+    body.dark-mode input::placeholder,
+    body.dark-mode select::placeholder,
+    body.dark-mode textarea::placeholder {
+        color: #888888 !important;
+    }
+
+    /* DataTables Specific */
+    body.dark-mode .dataTables_wrapper .dataTables_length,
+    body.dark-mode .dataTables_wrapper .dataTables_filter,
+    body.dark-mode .dataTables_wrapper .dataTables_info,
+    body.dark-mode .dataTables_wrapper .dataTables_processing,
+    body.dark-mode .dataTables_wrapper .dataTables_paginate {
+        color: #e4e4e4 !important;
+    }
+
+    body.dark-mode .dataTables_wrapper .dataTables_paginate .paginate_button {
+        color: #e4e4e4 !important;
+        background-color: #2d2d2d !important;
+        border-color: #3d3d3d !important;
+    }
+
+    body.dark-mode .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background-color: #3d3d3d !important;
+        border-color: #4d4d4d !important;
+    }
+
+    /* Modal Fixes */
+    body.dark-mode .modal-content {
+        background-color: #2d2d2d !important;
+        border-color: #3d3d3d !important;
+    }
+
+    body.dark-mode .modal-header,
+    body.dark-mode .modal-footer {
+        border-color: #3d3d3d !important;
+    }
+
+    /* List Groups */
+    body.dark-mode .list-group-item {
+        background-color: #2d2d2d !important;
+        border-color: #3d3d3d !important;
+        color: #e4e4e4 !important;
+    }
+
+    /* Dropdown Menus */
+    body.dark-mode .dropdown-menu {
+        background-color: #2d2d2d !important;
+        border-color: #3d3d3d !important;
+    }
+
+    body.dark-mode .dropdown-item {
+        color: #e4e4e4 !important;
+    }
+
+    body.dark-mode .dropdown-item:hover {
+        background-color: #3d3d3d !important;
+    }
+
+    /* Links */
+    body.dark-mode a:not(.btn):not(.nav-link) {
+        color: #45B6FE !important;
+    }
+
+    body.dark-mode a:not(.btn):not(.nav-link):hover {
+        color: #2196F3 !important;
+    }
+
+    /* Card Content (except statistics cards) */
+    body.dark-mode .card:not(.card-tale):not(.card-dark-blue):not(.card-light-blue):not(.card-light-danger) {
+        background-color: #2d2d2d !important;
+        border-color: #3d3d3d !important;
+    }
+
+    /* Alerts and Notifications */
+    body.dark-mode .alert {
+        background-color: #2d2d2d !important;
+        border-color: #3d3d3d !important;
+        color: #e4e4e4 !important;
+    }
+
+    /* Badges */
+    body.dark-mode .badge {
+        background-color: #3d3d3d !important;
+        color: #e4e4e4 !important;
+    }
+
+    /* Search Inputs */
+    body.dark-mode input[type="search"] {
+        background-color: #2d2d2d !important;
+        color: #e4e4e4 !important;
+        border-color: #3d3d3d !important;
+    }
+
+    /* Panel Headers */
+    body.dark-mode .panel-heading,
+    body.dark-mode .card-header {
+        background-color: #3d3d3d !important;
+        border-bottom-color: #4d4d4d !important;
+    }
+
+    /* Force text color for any elements that might be missed */
+    body.dark-mode [class*="text-dark"],
+    body.dark-mode [class*="text-black"] {
+        color: #e4e4e4 !important;
+    }
+
+    /* Chart Text Colors */
+    body.dark-mode .apexcharts-text,
+    body.dark-mode .apexcharts-text tspan,
+    body.dark-mode .apexcharts-title-text,
+    body.dark-mode .apexcharts-legend-text,
+    body.dark-mode .apexcharts-xaxis-label,
+    body.dark-mode .apexcharts-yaxis-label,
+    body.dark-mode .apexcharts-yaxis-title,
+    body.dark-mode .apexcharts-xaxis-title {
+        fill: #e4e4e4 !important;
+        color: #e4e4e4 !important;
+    }
+
+    body.dark-mode .apexcharts-legend-series {
+        color: #e4e4e4 !important;
+    }
+
+    body.dark-mode .apexcharts-yaxis text,
+    body.dark-mode .apexcharts-xaxis text {
+        fill: #e4e4e4 !important;
+    }
+
+    /* Chart tooltip */
+    body.dark-mode .apexcharts-tooltip {
+        background-color: #2d2d2d !important;
+        border: 1px solid #3d3d3d !important;
+        color: #e4e4e4 !important;
+    }
+
+    body.dark-mode .apexcharts-tooltip-title {
+        background-color: #3d3d3d !important;
+        border-bottom: 1px solid #4d4d4d !important;
+        color: #e4e4e4 !important;
+    }
+
+    /* Logo styles */
+    .navbar-brand {
+        padding: 15px 0;
+    }
+
+    .logo-container {
+        transition: all 0.3s ease;
+    }
+
+    .logo-container:hover {
+        transform: scale(1.05);
+    }
+
+    /* Dark mode support for logo */
+    body.dark-mode .logo-container span {
+        background: linear-gradient(45deg, #66bb6a, #64b5f6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-mode .navbar-brand.brand-logo-mini i,
+    body.dark-mode .logo-container i {
+        color: #66bb6a !important;
+    }
+    </style>
 
 
 

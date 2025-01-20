@@ -101,4 +101,11 @@ class StagiaireController extends Controller
 
         return redirect()->route('stagiaire.index')->with('success', 'Stagiaire deleted successfully.');
     }
+
+    // Method to get the total count of stagiaires
+    public function total() // Corrected method signature
+    {
+        $totalStagiaires = Stagiaire::count(); // Get the total count of stagiaires
+        return view('stagiaire.dashboard', compact('totalStagiaires')); // Pass the count to the dashboard view
+    }
 }

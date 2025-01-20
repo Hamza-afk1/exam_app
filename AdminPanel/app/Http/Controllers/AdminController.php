@@ -6,9 +6,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 use App\Models\Admin;
 use App\Models\User;
+use App\Models\Formateur;
+use App\Models\Stagiaire;
+use App\Models\Groupe;
 
 
 class AdminController extends Controller
@@ -70,15 +74,33 @@ class AdminController extends Controller
         return redirect()->route('admin.dashboard');
     }public function showDashboard()
     {
-        $LoggedAdminInfo = Admin::find(session('LoggedAdminInfo'));
-    
-        if (!$LoggedAdminInfo) {
-            return redirect()->route('admin.login')->with('fail', 'You must be logged in to access the dashboard');
+        try {
+            // Get counts directly using DB
+            $totalFormateurs = DB::table('formateurs')->count();
+            $totalStagiaires = DB::table('stagiaires')->count();
+            $totalUsers = DB::table('users')->count();
+            $totalGroups = DB::table('groupes')->count();
+
+            // Log the counts for debugging
+            \Log::info('Dashboard counts:', [
+                'formateurs' => $totalFormateurs,
+                'stagiaires' => $totalStagiaires,
+                'users' => $totalUsers,
+                'groups' => $totalGroups
+            ]);
+
+            return view('Admin.dashboard', [
+                'LoggedAdminInfo' => session('LoggedAdminInfo'),
+                'totalFormateurs' => $totalFormateurs,
+                'totalStagiaires' => $totalStagiaires,
+                'totalUsers' => $totalUsers,
+                'totalGroups' => $totalGroups
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Dashboard Error: ' . $e->getMessage());
+            return back()->with('error', 'Error loading dashboard data');
         }
-    
-        return view('admin.dashboard', [
-            'LoggedAdminInfo' => $LoggedAdminInfo,
-        ]);
     }
     public function showProfile(Request $request)
     {
@@ -228,4 +250,6 @@ class AdminController extends Controller
  
          return redirect()->route('admin.user')->with('success', 'User deleted successfully.');
      }
+
+     
 }

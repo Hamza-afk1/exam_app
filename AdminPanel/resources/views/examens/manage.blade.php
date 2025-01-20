@@ -11,6 +11,8 @@
                 @method('PUT') <!-- Utilisez PUT pour la mise à jour -->
                 <input type="hidden" name="examId" value="{{ $examen->id }}">
 
+
+                
                 <div class="form-group">
                     <label for="courseId">Cours</label>
                     <select id="courseId" name="courseId" class="form-control" required>

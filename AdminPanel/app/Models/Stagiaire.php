@@ -7,9 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Stagiaire extends Model
 {
-    use HasFactory;
-
-    // Si votre table s'appelle "stagiaires", vous n'avez pas besoin de définir $table.
-    // Sinon, déclarez-le ici : 
-    // protected $table = 'nom_de_votre_table';
+    protected $table = 'stagiaires'; // Ensure this matches the table name in the DB
+    protected $guarded = [];
 }

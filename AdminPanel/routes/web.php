@@ -4,6 +4,10 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\StagiaireController;
 use App\Http\Controllers\FormateurController;
 use App\Http\Controllers\ExamenController;
+use App\Http\Controllers\DashboardController;
+
+
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -21,6 +25,10 @@ Route::get('/', function () {
 
 Route::resource('formateurs', FormateurController::class);
 Route::get('/formateur', [FormateurController::class, 'index'])->name('formateur.index');
+
+// routes/web.php
+// Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+Route::get('/charts', [DashboardController::class, 'charts'])->name('charts');
 
 
 Route::prefix('examens')->group(function () {
@@ -45,6 +53,7 @@ Route::get('/examens/{id}/manage', [ExamenController::class, 'manage'])->name('e
 Route::post('/examens/update', [ExamenController::class, 'update'])->name('examens.update');
 Route::delete('/examens/{id}/delete', [ExamenController::class, 'deleteQuestion'])->name('examens.deleteQuestion');
 Route::post('/examens/add-question', [ExamenController::class, 'addQuestion'])->name('examens.addQuestion');
+Route::put('/examens/{id}', [ExamenController::class, 'update'])->name('examens.update');
 
 
 

@@ -16,7 +16,7 @@
             {{ session('error') }}
         </div>
     @endif
-
+    <div class="table-responsive">
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -53,5 +53,6 @@
     </table>
 
     <a href="{{ route('examens.create') }}" class="btn btn-success">Ajouter un nouvel examen</a>
+    </div>
 </div>
 @endsection

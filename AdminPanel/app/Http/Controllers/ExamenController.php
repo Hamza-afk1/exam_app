@@ -108,4 +108,24 @@ class ExamenController extends Controller
 
         return redirect()->back()->with('success', 'Question ajoutée avec succès.');
     }
+    public function update(Request $request, $id)
+    {
+        // Find the Examen by ID
+        $examen = Examen::findOrFail($id);
+    
+        // Validate the incoming request
+        $validatedData = $request->validate([
+            'courseId' => 'required|exists:courses,id',
+        ]);
+    
+        // Update the Examen with the new course ID
+        $examen->cou_id = $validatedData['courseId'];
+        $examen->save();
+    
+        // Redirect to the exam management page with a success message
+        return redirect()->route('examens.manage', ['id' => $examen->id])
+            ->with('success', 'Examen updated successfully');
+    }
+    
+
 }
