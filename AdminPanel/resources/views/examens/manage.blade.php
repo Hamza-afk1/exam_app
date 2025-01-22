@@ -6,13 +6,11 @@
         <!-- Colonne de gauche pour gérer l'examen -->
         <div class="col-md-6">
             <h1>Gérer l'examen : {{ $examen->ex_title }}</h1>
-            <form method="POST" action="{{ route('examens.update', $examen->id) }}">
+            <form method="POST" action="{{ route('examens.update') }}">
                 @csrf
                 @method('PUT') <!-- Utilisez PUT pour la mise à jour -->
-                <input type="hidden" name="examId" value="{{ $examen->id }}">
+                <input type="hidden" name="examen_id" value="{{ $examen->id }}">
 
-
-                
                 <div class="form-group">
                     <label for="courseId">Cours</label>
                     <select id="courseId" name="courseId" class="form-control" required>
@@ -69,8 +67,10 @@
                     <ul class="list-group">
                         @foreach($examen->questions as $question)
                         <li class="list-group-item">
-                            {{ $question->exam_question }}
-                            <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#modalForUpdateQuestion" data-id="{{ $question->id }}" data-question="{{ $question->exam_question }}" data-answer="{{ $question->exam_answer }}" data-choice-a="{{ $question->exam_ch1 }}" data-choice-b="{{ $question->exam_ch2 }}" data-choice-c="{{ $question->exam_ch3 }}" data-choice-d="{{ $question->exam_ch4 }}">Modifier</button>
+                            {{ $question->exam_question }} {{$question->id}}
+                            <button onclick="openModiferModel({{$question->id}})" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#modalForUpdateQuestion" data-id="{{ $question->id }}" data-question="{{ $question->exam_question }}" data-answer="{{ $question->exam_answer }}" data-choice-a="{{ $question->exam_ch1 }}" data-choice-b="{{ $question->exam_ch2 }}" data-choice-c="{{ $question->exam_ch3 }}" data-choice-d="{{ $question->exam_ch4 }}">
+                                Modifier
+                            </button>
                             <form method="POST" action="{{ route('examens.deleteQuestion', $question->id) }}" class="d-inline">
                                 @csrf
                                 @method('DELETE')
@@ -96,31 +96,33 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form method="POST" action="{{ route('examens.addQuestion', $examen->id) }}">
+                <form method="POST" action="{{ route('examens.addQuestion') }}">
                     @csrf
+                    <input type="hidden" name="examen_id" value="{{ $examen->id }}">
+
                     <div class="form-group">
                         <label for="examQuestion">Question</label>
-                        <input type="text" id="examQuestion" name="examQuestion" class="form-control" required>
+                        <input type="text" id="examQuestion" name="exam_question" class="form-control" required>
                     </div>
                     <div class="form-group">
                         <label for="examAnswer">Réponse correcte</label>
-                        <input type="text" id="examAnswer" name="examAnswer" class="form-control" required>
+                        <input type="text" id="examAnswer" name="exam_answer" class="form-control" required>
                     </div>
                     <div class="form-group">
                         <label for="examChoiceA">Choix A</label>
-                        <input type="text" id="examChoiceA" name="examChoiceA" class="form-control" required>
+                        <input type="text" id="examChoiceA" name="exam_ch1" class="form-control" required>
                     </div>
                     <div class="form-group">
                         <label for="examChoiceB">Choix B</label>
-                        <input type="text" id="examChoiceB" name="examChoiceB" class="form-control" required>
+                        <input type="text" id="examChoiceB" name="exam_ch2" class="form-control" required>
                     </div>
                     <div class="form-group">
                         <label for="examChoiceC">Choix C</label>
-                        <input type="text" id="examChoiceC" name="examChoiceC" class="form-control" required>
+                        <input type="text" id="examChoiceC" name="exam_ch3" class="form-control" required>
                     </div>
                     <div class="form-group">
                         <label for="examChoiceD">Choix D</label>
-                        <input type="text" id="examChoiceD" name="examChoiceD" class="form-control" required>
+                        <input type="text" id="examChoiceD" name="exam_ch4" class="form-control" required>
                     </div>
                     <button type="submit" class="btn btn-primary">Ajouter la question</button>
                 </form>
@@ -142,30 +144,32 @@
             <div class="modal-body">
                 <form method="POST" action="{{ route('examens.updateQuestion') }}">
                     @csrf
-                    <input type="hidden" id="updateQuestionId" name="questionId">
+                    @method('put')
+                    <input type="hidden" id="question_id" name="question_id" value="">
+
                     <div class="form-group">
                         <label for="updateExamQuestion">Question</label>
-                        <input type="text" id="updateExamQuestion" name="examQuestion" class="form-control" required>
+                        <input type="text" id="updateExamQuestion" name="exam_question" class="form-control" required>
                     </div>
                     <div class="form-group">
                         <label for="updateExamAnswer">Réponse correcte</label>
-                        <input type="text" id="updateExamAnswer" name="examAnswer" class="form-control" required>
+                        <input type="text" id="updateExamAnswer" name="exam_answer" class="form-control" required>
                     </div>
                     <div class="form-group">
                         <label for="updateExamChoiceA">Choix A</label>
-                        <input type="text" id="updateExamChoiceA" name="examChoiceA" class="form-control" required>
+                        <input type="text" id="updateExamChoiceA" name="exam_ch1" class="form-control" required>
                     </div>
                     <div class="form-group">
                         <label for="updateExamChoiceB">Choix B</label>
-                        <input type="text" id="updateExamChoiceB" name="examChoiceB" class="form-control" required>
+                        <input type="text" id="updateExamChoiceB" name="exam_ch2" class="form-control" required>
                     </div>
                     <div class="form-group">
                         <label for="updateExamChoiceC">Choix C</label>
-                        <input type="text" id="updateExamChoiceC" name="examChoiceC" class="form-control" required>
+                        <input type="text" id="updateExamChoiceC" name="exam_ch3" class="form-control" required>
                     </div>
                     <div class="form-group">
                         <label for="updateExamChoiceD">Choix D</label>
-                        <input type="text" id="updateExamChoiceD" name="examChoiceD " class="form-control" required>
+                        <input type="text" id="updateExamChoiceD" name="exam_ch4 " class="form-control" required>
                     </div>
                     <button type="submit" class="btn btn-primary">Mettre à jour la question</button>
                 </form>
@@ -175,24 +179,10 @@
 </div>
 
 <script>
-    $('#modalForUpdateQuestion').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget); // Bouton qui a déclenché le modal
-        var questionId = button.data('id');
-        var questionText = button.data('question');
-        var answerText = button.data('answer');
-        var choiceA = button.data('choice-a');
-        var choiceB = button.data('choice-b');
-        var choiceC = button.data('choice-c');
-        var choiceD = button.data('choice-d');
+   function openModiferModel(question_id) {
+        var inputElement = document.getElementById('question_id');
+        inputElement.value= question_id
 
-        var modal = $(this);
-        modal.find('#updateQuestionId').val(questionId);
-        modal.find('#updateExamQuestion').val(questionText);
-        modal.find('#updateExamAnswer').val(answerText);
-        modal.find('#updateExamChoiceA').val(choiceA);
-        modal.find('#updateExamChoiceB').val(choiceB);
-        modal.find('#updateExamChoiceC').val(choiceC);
-        modal.find('#updateExamChoiceD').val(choiceD);
-    });
+   }
 </script>
 @endsection

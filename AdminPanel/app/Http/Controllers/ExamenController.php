@@ -35,6 +35,8 @@ class ExamenController extends Controller
     {
         $examen = Examen::with('questions')->findOrFail($id);
         $courses = Course::all();
+        $questions = Question::all();
+
         return view('examens.manage', compact('examen', 'courses'));
     }
 
@@ -49,7 +51,7 @@ class ExamenController extends Controller
             'temps_limite' => 'required|integer|min:1',
             'question_limit' => 'required|integer|min:1',
         ]);
-
+        
         // Créer un nouvel examen
         $examen = Examen::create($validatedData);
 
@@ -58,74 +60,45 @@ class ExamenController extends Controller
     }
 
     // Met à jour une question existante
-    public function updateQuestion(Request $request)
+    public function updateQuestion(Request $request )
     {
+
         $validatedData = $request->validate([
-            'questionId' => 'required|exists:exam_question_tbl,id', // Assurez-vous que la table est correcte
-            'examQuestion' => 'required|string',
-            'examAnswer' => 'required|string',
-            'examChoiceA' => 'required|string',
-            'examChoiceB' => 'required|string',
-            'examChoiceC' => 'required|string',
-            'examChoiceD' => 'required|string',
+            'question_id'    => 'required|exists:questions,id',
+            'exam_question'  => 'required|string',
+            'exam_answer'    => 'required|string',
+            'exam_ch1'       => 'required|string',
+            'exam_ch2'       => 'required|string',
+            'exam_ch3'       => 'required|string',
+            'exam_ch4'       => 'required|string', // This matches the form and table
+            'examen_id'      => 'required|exists:examens,id',
         ]);
+        
 
         // Trouver la question par ID et mettre à jour
-        $question = Question::findOrFail($validatedData['questionId']);
-        $question->exam_question = $validatedData['examQuestion'];
-        $question->exam_answer = $validatedData['examAnswer'];
-        $question->exam_ch1 = $validatedData['examChoiceA'];
-        $question->exam_ch2 = $validatedData['examChoiceB'];
-        $question->exam_ch3 = $validatedData['examChoiceC'];
-        $question->exam_ch4 = $validatedData['examChoiceD'];
-        $question->save();
+        $question = Question::findOrFail($validatedData['question_id']);
 
+        $question->update($validatedData);
         return redirect()->back()->with('success', 'Question mise à jour avec succès.');
     }
 
     // Ajoute une nouvelle question à un examen
-    public function addQuestion(Request $request, $examenId)
+    public function addQuestion(Request $request)
     {
+
         $validatedData = $request->validate([
-            'examQuestion' => 'required|string',
-            'examAnswer' => 'required|string',
-            'examChoiceA' => 'required|string',
-            'examChoiceB' => 'required|string',
-            'examChoiceC' => 'required|string',
-            'examChoiceD' => 'required|string',
+            'exam_question' => 'required|string',
+            'exam_answer' => 'required|string',
+            'exam_ch1' => 'required|string',
+            'exam_ch2' => 'required|string',
+            'exam_ch3' => 'required|string',
+            'exam_ch4' => 'required|string',
+            'examen_id' => 'required|exists:examens,id',
         ]);
 
         // Créer une nouvelle question
-        $question = new Question();
-        $question->exam_question = $validatedData['examQuestion'];
-        $question->exam_answer = $validatedData['examAnswer'];
-        $question->exam_ch1 = $validatedData['examChoiceA'];
-        $question->exam_ch2 = $validatedData['examChoiceB'];
-        $question->exam_ch3 = $validatedData['examChoiceC'];
-        $question->exam_ch4 = $validatedData['examChoiceD'];
-        $question->exam_id = $examenId; // Assurez-vous que vous avez une colonne pour l'ID de l'examen
-        $question->save();
+        $question =  Question::create($validatedData);
 
         return redirect()->back()->with('success', 'Question ajoutée avec succès.');
     }
-    public function update(Request $request, $id)
-    {
-        // Find the Examen by ID
-        $examen = Examen::findOrFail($id);
-    
-        // Validate the incoming request
-        $validatedData = $request->validate([
-            'courseId' => 'required|exists:courses,id',
-        ]);
-    
-        // Update the Examen with the new course ID
-        $examen->cou_id = $validatedData['courseId'];
-        $examen->save();
-    
-        // Redirect to the exam management page with a success message
-        return redirect()->route('examens.manage', ['id' => $examen->id])
-            ->with('success', 'Examen updated successfully');
-    }
-    
-
 }

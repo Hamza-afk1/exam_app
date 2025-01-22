@@ -30,7 +30,6 @@ Route::get('/formateur', [FormateurController::class, 'index'])->name('formateur
 // Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 Route::get('/charts', [DashboardController::class, 'charts'])->name('charts');
 
-
 Route::prefix('examens')->group(function () {
     Route::get('/', [ExamenController::class, 'index'])->name('examens.index'); // Liste des examens
     Route::get('/create', [ExamenController::class, 'create'])->name('examens.create'); // Formulaire de création
@@ -39,8 +38,9 @@ Route::prefix('examens')->group(function () {
 });
 
 Route::delete('/examens/{id}', [ExamenController::class, 'destroy'])->name('examens.delete');
-Route::post('/examens/update-question', [ExamenController::class, 'updateQuestion'])->name('examens.updateQuestion');
+Route::put('/examens/update-question', [ExamenController::class, 'updateQuestion'])->name('examens.updateQuestion');
 Route::post('/examens/{examen}/add-question', [ExamenController::class, 'addQuestion'])->name('examens.addQuestion');
+
 
 
 
@@ -53,8 +53,6 @@ Route::get('/examens/{id}/manage', [ExamenController::class, 'manage'])->name('e
 Route::post('/examens/update', [ExamenController::class, 'update'])->name('examens.update');
 Route::delete('/examens/{id}/delete', [ExamenController::class, 'deleteQuestion'])->name('examens.deleteQuestion');
 Route::post('/examens/add-question', [ExamenController::class, 'addQuestion'])->name('examens.addQuestion');
-Route::put('/examens/{id}', [ExamenController::class, 'update'])->name('examens.update');
-
 
 
 

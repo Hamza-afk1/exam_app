@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Examen extends Model
 {
     use HasFactory;
+    protected $table = 'examens'; // Explicitly set the table name
+
     protected $fillable = [
         'titre',
         'groupe_id',

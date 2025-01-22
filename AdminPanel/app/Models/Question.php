@@ -8,13 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 class Question extends Model
 {
     use HasFactory;
+    protected $table = 'questions'; // Explicitly set the table name
 
     protected $fillable = [
         'examen_id',
-        'question',
-        'type',
-        'reponses',
-        'reponse_correcte',
+        'exam_answer',
+        'exam_question',
+        'exam_ch1',
+        'exam_ch2',
+        'exam_ch3',
+        'exam_ch4',
     ];
 
     public function examen()
