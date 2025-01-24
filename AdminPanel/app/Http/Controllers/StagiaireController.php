@@ -4,17 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\Stagiaire;
 use Illuminate\Http\Request;
+use App\Models\Groupe;
 use Illuminate\Support\Facades\Hash;
+
 
 class StagiaireController extends Controller
 {
     // Display a listing of the stagiaires
     public function index()
-    {
-        $stagiaires = Stagiaire::all(); // Fetch all stagiaires
-        return view('stagiaire.index', compact('stagiaires')); // Pass data to the view
-    }
-
+{
+    $stagiaires = Stagiaire::all();
+    $groupes = Groupe::orderBy('nom')->get();
+    return view('stagiaire.index', compact('stagiaires', 'groupes')); // Changé de 'stagiaires.index' à 'stagiaire.index'
+}
     // Store a newly created stagiaire in storage
     public function store(Request $request)
     {

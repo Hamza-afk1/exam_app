@@ -2,13 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Groupe extends Model
 {
-    use HasFactory;
+    public $timestamps = false;  // Désactive les timestamps
 
-    protected $table = 'groupes'; // Nom de la table en base de données
-    protected $fillable = ['nom']; // Champs qui peuvent être remplis
+    protected $fillable = [
+        'nom'
+    ];
+
+    public function stagiaires()
+    {
+        return $this->hasMany(Stagiaire::class, 'groupe', 'nom');
+    }
 }

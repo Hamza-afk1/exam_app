@@ -39,7 +39,14 @@
                                             </div>
                                             <div class="form-group">
                                                 <label for="stagiaireGroupe">Groupe</label>
-                                                <input type="text" class="form-control" id="stagiaireGroupe" name="groupe" required>
+                                                <select class="form-control" id="stagiaireGroupe" name="groupe" required>
+                                                    <option value="">Sélectionner un groupe</option>
+                                                    @foreach($groupes as $groupe)
+                                                        <option value="{{ $groupe->nom }}" {{ old('groupe') == $groupe->nom ? 'selected' : '' }}>
+                                                            {{ $groupe->nom }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
                                             </div>
                                             <div class="form-group">
                                                 <label for="stagiaireEmail">Email</label>
@@ -134,7 +141,14 @@
                                                             </div>
                                                             <div class="form-group">
                                                                 <label for="editStagiaireGroupe{{ $stagiaire->id }}">Groupe</label>
-                                                                <input type="text" class="form-control" id="editStagiaireGroupe{{ $stagiaire->id }}" name="groupe" value="{{ $stagiaire->groupe }}" required>
+                                                                <select class="form-control" id="editStagiaireGroupe{{ $stagiaire->id }}" name="groupe" required>
+                                                                    <option value="">Sélectionner un groupe</option>
+                                                                    @foreach($groupes as $groupe)
+                                                                        <option value="{{ $groupe->nom }}" {{ $stagiaire->groupe == $groupe->nom ? 'selected' : '' }}>
+                                                                            {{ $groupe->nom }}
+                                                                        </option>
+                                                                    @endforeach
+                                                                </select>
                                                             </div>
                                                             <div class="form-group">
                                                                 <label for="editStagiaireEmail{{ $stagiaire->id }}">Email</label>

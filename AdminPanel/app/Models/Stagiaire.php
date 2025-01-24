@@ -7,6 +7,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class Stagiaire extends Model
 {
-    protected $table = 'stagiaires'; // Ensure this matches the table name in the DB
-    protected $guarded = [];
+    use HasFactory;
+
+    protected $fillable = [
+        'nom',
+        'prenom',
+        'email',
+        'password',
+        'groupe'
+    ];
+
+    public function groupe()
+    {
+        return $this->belongsTo(Groupe::class, 'groupe', 'nom');  // Relation basée sur le nom du groupe
+    }
 }
