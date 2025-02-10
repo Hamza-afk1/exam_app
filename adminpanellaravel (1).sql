@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le : jeu. 16 jan. 2025 à 20:07
+-- Généré le : lun. 10 fév. 2025 à 10:23
 -- Version du serveur : 10.4.32-MariaDB
 -- Version de PHP : 8.0.30
 
@@ -45,6 +45,21 @@ CREATE TABLE `admins` (
 
 INSERT INTO `admins` (`id`, `name`, `email`, `password`, `picture`, `bio`, `phonenumber`, `created_at`, `updated_at`) VALUES
 (1, 'hamid', 'hamid@gmail.com', '$2y$10$7CKsAUNvLwyZKswZr4rCdewMZJPOEuf2ERKPiG2a8k4YuHfYzSAqC', NULL, NULL, NULL, '2025-01-15 21:01:53', '2025-01-15 21:01:53');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `choices`
+--
+
+CREATE TABLE `choices` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `question_id` bigint(20) UNSIGNED NOT NULL,
+  `choice_text` text NOT NULL,
+  `is_correct` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -91,7 +106,8 @@ CREATE TABLE `examens` (
 
 INSERT INTO `examens` (`id`, `titre`, `groupe_id`, `description`, `temps_limite`, `question_limit`, `created_at`, `updated_at`) VALUES
 (2, 'Examen de développement web', 2, 'Examen sur les technologies de développement web.', 90, 15, '2025-01-15 17:30:03', '2025-01-15 17:30:03'),
-(3, 'php', 2, 'devlopement digital', 50, 12, '2025-01-15 21:11:11', '2025-01-15 21:11:11');
+(3, 'php', 2, 'devlopement digital', 50, 12, '2025-01-15 21:11:11', '2025-01-15 21:11:11'),
+(4, 'CC1 back end', 3, 'CC1 back end', 120, 2, '2025-01-25 09:27:16', '2025-01-25 09:27:16');
 
 -- --------------------------------------------------------
 
@@ -117,7 +133,9 @@ CREATE TABLE `formateurs` (
 
 INSERT INTO `formateurs` (`id`, `name`, `prenom`, `email`, `role`, `password`, `picture`, `created_at`, `updated_at`) VALUES
 (1, 'Hamza', 'bohali', 'Hamza@gmail.com', 'formateur', '$2y$10$r3I2k6jtW660T4f.K.NmduM/W77wMOEA4DzbI7a1R14zogFmPhlEC', NULL, '2025-01-16 13:37:35', '2025-01-16 13:37:35'),
-(2, 'lhyanni', 'Issam', 'lhyanni@gmail.com', 'formateur', '$2y$10$aHoMjNScStir.TBJkVxkVeEKlWBtyoQCIBBTYpcSmKmtf/0x5VNIS', NULL, '2025-01-16 17:09:40', '2025-01-16 17:09:40');
+(2, 'lhyanni', 'Issam', 'lhyanni@gmail.com', 'formateur', '$2y$10$aHoMjNScStir.TBJkVxkVeEKlWBtyoQCIBBTYpcSmKmtf/0x5VNIS', NULL, '2025-01-16 17:09:40', '2025-01-16 17:09:40'),
+(3, 'lghazy', 'boujamaa', 'lghazy@gmail', 'formateur', '$2y$10$4OQafyYP465.0dxp2HkEA.W0PSPVyiPYqdGRJVZKEFtupMTvIKCrS', NULL, '2025-01-19 16:24:43', '2025-01-19 16:24:43'),
+(4, 'hamid', 'star', 'hamid@gmail.com', 'formateur', '$2y$10$8KgfOx2CKtAQM8kWY57c1upscHxUz9YBjiQETgn02obM1su0tUbvi', NULL, '2025-01-20 18:12:58', '2025-01-20 18:12:58');
 
 -- --------------------------------------------------------
 
@@ -162,13 +180,11 @@ CREATE TABLE `questions` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `examen_id` bigint(20) UNSIGNED NOT NULL,
   `exam_question` text NOT NULL,
-  `exam_answer` text NOT NULL,
-  `exam_ch1` text NOT NULL,
-  `exam_ch2` text NOT NULL,
-  `exam_ch3` text NOT NULL,
-  `exam_ch4` text NOT NULL,
+  `question_type` enum('qcm','open') NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `question` text NOT NULL,
+  `type` enum('qcm','open') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -229,6 +245,13 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
+-- Déchargement des données de la table `users`
+--
+
+INSERT INTO `users` (`id`, `name`, `email`, `picture`, `bio`, `role`, `phonenumber`, `created_at`, `updated_at`) VALUES
+(6, 'talebmoh', 'ali@gmail.com', NULL, NULL, 'Stagiaire', NULL, '2025-01-19 19:17:31', '2025-01-19 19:17:31');
+
+--
 -- Index pour les tables déchargées
 --
 
@@ -237,6 +260,13 @@ CREATE TABLE `users` (
 --
 ALTER TABLE `admins`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Index pour la table `choices`
+--
+ALTER TABLE `choices`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `question_id` (`question_id`);
 
 --
 -- Index pour la table `cours`
@@ -274,7 +304,7 @@ ALTER TABLE `migrations`
 --
 ALTER TABLE `questions`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `exam_id` (`examen_id`);
+  ADD KEY `examen_id` (`examen_id`);
 
 --
 -- Index pour la table `stagiaires`
@@ -300,6 +330,12 @@ ALTER TABLE `admins`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT pour la table `choices`
+--
+ALTER TABLE `choices`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT pour la table `cours`
 --
 ALTER TABLE `cours`
@@ -309,19 +345,19 @@ ALTER TABLE `cours`
 -- AUTO_INCREMENT pour la table `examens`
 --
 ALTER TABLE `examens`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT pour la table `formateurs`
 --
 ALTER TABLE `formateurs`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT pour la table `groupes`
 --
 ALTER TABLE `groupes`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT pour la table `migrations`
@@ -345,11 +381,17 @@ ALTER TABLE `stagiaires`
 -- AUTO_INCREMENT pour la table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- Contraintes pour les tables déchargées
 --
+
+--
+-- Contraintes pour la table `choices`
+--
+ALTER TABLE `choices`
+  ADD CONSTRAINT `choices_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `questions` (`id`) ON DELETE CASCADE;
 
 --
 -- Contraintes pour la table `examens`
@@ -361,10 +403,9 @@ ALTER TABLE `examens`
 -- Contraintes pour la table `questions`
 --
 ALTER TABLE `questions`
-  ADD CONSTRAINT `questions_ibfk_1` FOREIGN KEY (`examen_id`) REFERENCES `examens` (`id`);
+  ADD CONSTRAINT `questions_ibfk_1` FOREIGN KEY (`examen_id`) REFERENCES `examens` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-
