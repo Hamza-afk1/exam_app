@@ -5,6 +5,8 @@ use App\Http\Controllers\StagiaireController;
 use App\Http\Controllers\FormateurController;
 use App\Http\Controllers\ExamenController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CoursController; 
+use App\Http\Controllers\GroupeController; 
 
 
 
@@ -22,6 +24,17 @@ use App\Http\Controllers\DashboardController;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::resource('groupes', GroupeController::class);
+Route::resource('stagiaires', StagiaireController::class);
+
+
+Route::resource('cours', CoursController::class);
+Route::resource('examens', ExamenController::class);
+
+Route::get('examens/{id}/manage', [ExamenController::class, 'manage'])->name('examens.manage');
+Route::post('examens/questions', [ExamenController::class, 'addQuestion'])->name('examens.addQuestion');
+Route::put('examens/questions', [ExamenController::class, 'updateQuestion'])->name('examens.updateQuestion');
+Route::delete('examens/questions/{id}', [ExamenController::class, 'deleteQuestion'])->name('examens.deleteQuestion');
 
 Route::resource('formateurs', FormateurController::class);
 Route::get('/formateur', [FormateurController::class, 'index'])->name('formateur.index');

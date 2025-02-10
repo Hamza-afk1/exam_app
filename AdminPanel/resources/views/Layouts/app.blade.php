@@ -5,6 +5,7 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Online Exam</title>
     <!-- plugins:css -->
     <link rel="stylesheet" href="/vendors/feather/feather.css">
@@ -12,13 +13,14 @@
     <link rel="stylesheet" href="/vendors/css/vendor.bundle.base.css">
     <!-- endinject -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <!-- Plugin css for this page -->
     <link rel="stylesheet" href="/vendors/datatables.net-bs4/dataTables.bootstrap4.css">
     <link rel="stylesheet" href="/vendors/ti-icons/css/themify-icons.css">
     <link rel="stylesheet" type="text/css" href="js/select.dataTables.min.css">
     <link rel="stylesheet" type="text/css" href="js/select.dataTables.min.css">
-
+<!-- Dans la section head de votre layout -->
+<link rel="stylesheet" href="https://cdn.materialdesignicons.com/5.9.55/css/materialdesignicons.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <!-- inject:css -->
     <link rel="stylesheet" href="/css/vertical-layout-light/style.css">
@@ -375,11 +377,25 @@
                             <span class="menu-title">Profile</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('cours.index') }}">
+                            <i class="fas fa-book menu-icon"></i>
+                            <span class="menu-title">Cours</span>
+                        </a>
+                    </li>
+                  
+                    <li class="nav-item menu-groupe">
+                        <a class="nav-link" href="{{ route('groupes.index') }}">
+                            <i class="fas fa-users menu-icon"></i>
+                            <span class="menu-title">Groupes</span>
+                        </a>
+                    </li>
+                    
 
                     <li class="nav-item">
                         <a class="nav-link {{ request()->is('admin/user*') ? 'active' : '' }}" data-toggle="collapse"
                             href="#form-elements" aria-expanded="false" aria-controls="form-elements">
-                            <i class="icon-columns menu-icon"></i>
+                            <i class="fas fa-user-lock menu-icon"></i>
                             <span class="menu-title">Users</span>
                             <i class="menu-arrow"></i>
                         </a>
@@ -396,7 +412,8 @@
 
                     <li class="nav-item">
     <a class="nav-link" data-toggle="collapse" href="#charts" aria-expanded="false" aria-controls="charts">
-        <i class="icon-bar-graph menu-icon"></i>
+        <i class="fas fa-chart-bar menu-icon"></i> 
+
         <span class="menu-title">Charts</span>
         <i class="menu-arrow"></i>
     </a>
@@ -410,10 +427,12 @@
 </li>
 
 
+
+
                     <!-- Add stagiaire ici -->
                     <li class="nav-item">
                         <a class="nav-link" data-toggle="collapse" href="#stagiaire" aria-expanded="false">
-                            <i class="icon-columns menu-icon"></i>
+                            <i class="fas fa-users menu-icon"></i>
                             <span class="menu-title">Stagiaires</span>
                             <i class="menu-arrow"></i>
                         </a>
@@ -431,7 +450,7 @@
 
                     <li class="nav-item">
                         <a class="nav-link" data-toggle="collapse" href="#formateur" aria-expanded="false">
-                            <i class="icon-columns menu-icon"></i>
+                            <i class="fas fa-user-check menu-icon"></i>
                             <span class="menu-title">Formateurs</span>
                             <i class="menu-arrow"></i>
                         </a>
@@ -449,7 +468,7 @@
                        <!-- Lien vers les Examens -->
         <li class="nav-item">
         <a class="nav-link" data-toggle="collapse" href="#examens" aria-expanded="false">
-        <i class="icon-columns menu-icon"></i>
+            <i class="fas fa-clipboard-check menu-icon"></i>
                 <span class="menu-title">Examens</span>
                 <i class="menu-arrow"></i>
             </a>
@@ -572,6 +591,10 @@
     <script src="/js/dashboard.js"></script>
     <script src="/js/Chart.roundedBarCharts.js"></script>
     <!-- End custom js for this page-->
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
