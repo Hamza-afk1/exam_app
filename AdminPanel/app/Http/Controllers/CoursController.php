@@ -41,6 +41,7 @@ class CoursController extends Controller
             ], 500);
         }
     }
+
     public function update(Request $request, $id)
     {
         $validated = $request->validate([

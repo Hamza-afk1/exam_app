@@ -14,16 +14,25 @@ class Examen extends Model
         'groupe_id',
         'description',
         'temps_limite',
-        'question_limit'
+        'question_limit',
+        'cou_id', // Assuming this is the foreign key for the course
     ];
 
-    public function groupe()
-{
-    return $this->belongsTo(Groupe::class);
-}
+    // Define the relationship with the Cours model
+    public function course()
+    {
+        return $this->belongsTo(Cours::class, 'cou_id');
+    }
 
+    // Define the relationship with the Groupe model
+    public function groupe()
+    {
+        return $this->belongsTo(Groupe::class);
+    }
+
+    // Define the relationship with the Question model
     public function questions()
     {
-        return $this->hasMany(ExamQuestion::class, 'exam_id');
+        return $this->hasMany(Question::class);
     }
 }
