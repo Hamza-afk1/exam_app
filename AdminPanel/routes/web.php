@@ -91,3 +91,10 @@ Route::put('/users/{id}', [AdminController::class, 'update'])->name('users.updat
 Route::delete('/users/{id}', [AdminController::class, 'destroy'])->name('users.destroy');
 
 Route::post('/admin/logout', [AdminController::class, 'logout'])->name('admin.logout');
+
+Route::get('/examens/{id}/correction', [ExamenController::class, 'correction'])->name('examens.correction');
+Route::post('/questions/{id}/correct', [ExamenController::class, 'correctQuestion'])->name('examens.correctQuestion');
+
+ // Nouvelle route pour la liste des corrections
+ Route::get('/corrections', [ExamenController::class, 'correctionsList'])->name('examens.corrections.list');
+ Route::get('/examens/{id}/correction', [ExamenController::class, 'correction'])->name('examens.correction');

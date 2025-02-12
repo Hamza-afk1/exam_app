@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Examen;
-use App\Models\Cours; // Correct import
+use App\Models\Cours;
 use App\Models\Groupe;
 use App\Models\Question; // Added import for Question
+use App\Models\QuestionChoice; // Added import for QuestionChoice
 use Illuminate\Http\Request;
 
 class ExamenController extends Controller
@@ -15,7 +16,7 @@ class ExamenController extends Controller
      */
     public function index()
     {
-        $examens = Examen::with('groupe')->get();
+        $examens = Examen::all();
         return view('examens.index', compact('examens'));
     }
 
@@ -104,17 +105,24 @@ class ExamenController extends Controller
     }
 
     /**
-     * Manage an examen (questions, etc.)
+     * Gérer un examen (questions, etc.)
      */
     public function manage($id)
     {
-        // Fetch the examen with its course and questions
-        $examen = Examen::with(['course', 'questions'])->findOrFail($id);
-    
-        // Fetch all courses to populate the dropdown
-        $courses = Cours::all();
-    
-        return view('examens.manage', compact('examen', 'courses'));
+        try {
+            // Récupérer l'examen avec ses relations
+            $examen = Examen::with(['questions.choices'])->findOrFail($id);
+            $cours = Cours::all();  // Si vous avez besoin des cours
+            
+            // Pour le débogage
+            \Log::info('Examen trouvé:', ['id' => $id, 'titre' => $examen->titre]);
+            
+            return view('examens.manage', compact('examen', 'cours'));
+        } catch (\Exception $e) {
+            \Log::error('Erreur dans manage:', ['error' => $e->getMessage()]);
+            return redirect()->route('examens.index')
+                            ->with('error', 'Examen non trouvé ou erreur: ' . $e->getMessage());
+        }
     }
     
 
@@ -123,29 +131,51 @@ class ExamenController extends Controller
      */
     public function addQuestion(Request $request)
     {
-        $validated = $request->validate([
-            'examen_id' => 'required|exists:examens,id',
-            'exam_question' => 'required|string',
-            'exam_answer' => 'required|string',
-            'exam_ch1' => 'required|string',
-            'exam_ch2' => 'required|string',
-            'exam_ch3' => 'required|string',
-            'exam_ch4' => 'required|string',
-        ]);
+        try {
+            $request->validate([
+                'examen_id' => 'required|exists:examens,id',
+                'exam_question' => 'required|array',
+                'exam_question.*' => 'required|string',
+                'question_type' => 'required|array',
+                'question_type.*' => 'required|in:qcm,open',
+                'points' => 'required|array',
+                'points.*' => 'required|numeric|min:0'
+            ]);
 
-        $examen = Examen::findOrFail($validated['examen_id']);
-        
-        $examen->questions()->create([ // Assuming Examen has a `hasMany` relationship with Question
-            'exam_question' => $validated['exam_question'],
-            'exam_answer' => $validated['exam_answer'],
-            'exam_ch1' => $validated['exam_ch1'],
-            'exam_ch2' => $validated['exam_ch2'],
-            'exam_ch3' => $validated['exam_ch3'],
-            'exam_ch4' => $validated['exam_ch4'],
-        ]);
+            foreach ($request->exam_question as $key => $questionText) {
+                $question = Question::create([
+                    'examen_id' => $request->examen_id,
+                    'exam_question' => $questionText,
+                    'question_type' => $request->question_type[$key],
+                    'points' => $request->points[$key]
+                ]);
 
-        return redirect()->route('examens.manage', $examen->id)
-            ->with('success', 'Question ajoutée avec succès');
+                if ($request->question_type[$key] === 'qcm' && isset($request->choices[$key])) {
+                    foreach ($request->choices[$key] as $choiceIndex => $choiceText) {
+                        if (!empty($choiceText)) {
+                            QuestionChoice::create([
+                                'question_id' => $question->id,
+                                'choice_text' => $choiceText,
+                                'is_correct' => in_array(
+                                    (string)$choiceIndex, 
+                                    $request->correct_answers[$key] ?? []
+                                )
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            return redirect()
+                ->route('examens.manage', ['id' => $request->examen_id])
+                ->with('success', 'Questions ajoutées avec succès');
+
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Erreur lors de l\'ajout des questions: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -186,5 +216,39 @@ class ExamenController extends Controller
         $question->delete();
 
         return redirect()->back()->with('success', 'Question supprimée avec succès');
+    }
+
+    public function correction($id)
+    {
+        $examen = Examen::with(['questions.choices'])->findOrFail($id);
+        return view('examens.correction', compact('examen'));
+    }
+
+    public function correctQuestion(Request $request, $id)
+    {
+        $request->validate([
+            'awarded_points' => 'required|numeric|min:0',
+            'correction_comment' => 'nullable|string'
+        ]);
+
+        $question = Question::findOrFail($id);
+        
+        // Vérifier que les points attribués ne dépassent pas le maximum
+        if ($request->awarded_points > $question->points) {
+            return redirect()->back()->with('error', 'Les points attribués ne peuvent pas dépasser le maximum');
+        }
+
+        $question->update([
+            'awarded_points' => $request->awarded_points,
+            'correction_comment' => $request->correction_comment
+        ]);
+
+        return redirect()->back()->with('success', 'Correction enregistrée');
+    }
+
+    public function correctionsList()
+    {
+        $examens = Examen::with('questions')->get();
+        return view('examens.corrections-list', compact('examens'));
     }
 }

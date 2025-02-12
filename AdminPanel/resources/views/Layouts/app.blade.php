@@ -484,6 +484,11 @@
                             <span class="menu-title">Créer un Examen</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('examens.corrections.list') }}">
+                            <span class="menu-title">Corrections</span>
+                        </a>
+                    </li>
                 </ul>
             </div>
         </li>

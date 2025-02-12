@@ -5,7 +5,7 @@
     <div class="row">
         <!-- Colonne de gauche pour gérer l'examen -->
         <div class="col-md-6">
-            <h1>Gérer l'examen : {{ $examen->ex_title }}</h1>
+            <h1>Gérer l'examen : {{ $examen->titre }}</h1>
             <form method="POST" action="{{ route('examens.update') }}">
                 @csrf
                 @method('PUT') <!-- Utilisez PUT pour la mise à jour -->
@@ -15,22 +15,22 @@
                     <label for="courseId">Cours</label>
                     <select id="courseId" name="courseId" class="form-control" required>
                         <option value="{{ $examen->cou_id }}">
-                            {{ $examen->course ? $examen->course->cou_name : 'Aucun cours associé' }}
+                            {{ $examen->cours ? $examen->cours->titre : 'Aucun cours associé' }}
                         </option>
-                        @foreach($courses as $course)
-                            <option value="{{ $course->id }}">{{ $course->cou_name }}</option>
+                        @foreach($cours as $course)
+                            <option value="{{ $course->id }}">{{ $course->titre }}</option>
                         @endforeach
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label for="examTitle">Titre de l'examen</label>
-                    <input type="text" id="examTitle" name="examTitle" class="form-control" required value="{{ $examen->ex_title }}">
+                    <input type="text" id="examTitle" name="examTitle" class="form-control" required value="{{ $examen->titre }}">
                 </div>
 
                 <div class="form-group">
                     <label for="examDesc">Description de l'examen</label>
-                    <input type="text" id="examDesc" name="examDesc" class="form-control" required value="{{ $examen->ex_description }}">
+                    <input type="text" id="examDesc" name="examDesc" class="form-control" required value="{{ $examen->description }}">
                 </div>
 
                 <div class="form-group">
@@ -107,61 +107,60 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form method="POST" action="{{ route('examens.addQuestion') }}">
+                <form action="{{ route('examens.addQuestion') }}" method="POST" id="questionForm">
                     @csrf
                     <input type="hidden" name="examen_id" value="{{ $examen->id }}">
-
-                    <div id="questionsContainer">
-                        <!-- Conteneur pour les questions -->
-                        <div class="question-group">
+                    
+                    <div id="questions-container">
+                        <!-- Premier groupe de questions -->
+                        <div class="question-group mb-4 border p-3">
                             <div class="form-group">
-                                <label for="questionType">Type de question</label>
-                                <select name="question_type[]" class="form-control question-type" required onchange="toggleQuestionType(this)">
+                                <label>Question</label>
+                                <textarea name="exam_question[]" class="form-control" required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Type de question</label>
+                                <select name="question_type[]" class="form-control question-type-select" onchange="toggleQuestionType(this)">
                                     <option value="qcm">QCM</option>
                                     <option value="open">Question ouverte</option>
                                 </select>
                             </div>
 
-                            <div class="form-group">
-                                <label for="examQuestion">Question</label>
-                                <input type="text" name="exam_question[]" class="form-control" required>
-                            </div>
-
-                            <!-- Champs pour QCM -->
-                            <div class="qcm-fields">
-                                <div class="qcm-choices">
-                                    <div class="form-group qcm-choice">
-                                        <label>Choix 1</label>
+                            <div class="qcm-options">
+                                <div class="choices-container">
+                                    <div class="choice-group mb-2">
                                         <div class="input-group">
-                                            <input type="text" name="exam_ch[0][]" class="form-control" required>
+                                            <input type="text" name="choices[0][]" class="form-control" placeholder="Option 1">
                                             <div class="input-group-append">
                                                 <div class="input-group-text">
-                                                    <input type="checkbox" name="correct_answer[0][]" value="0"> Correct
+                                                    <input type="checkbox" name="correct_answers[0][]" value="0"> Correct
                                                 </div>
-                                            </div>
-                                            <div class="input-group-append">
-                                                <button type="button" class="btn btn-danger btn-sm" onclick="removeQcmChoice(this)">Supprimer</button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <button type="button" class="btn btn-sm btn-secondary" onclick="addQcmChoice(this)">Ajouter un choix</button>
+                                <button type="button" class="btn btn-secondary btn-sm mt-2" onclick="addChoice(this)">
+                                    Ajouter une option
+                                </button>
                             </div>
 
-                            <!-- Champ pour question ouverte -->
-                            <div class="open-question-field" style="display: none;">
-                                <div class="form-group">
-                                    <label>Réponse attendue</label>
-                                    <textarea name="open_answer[]" class="form-control"></textarea>
-                                </div>
+                            <div class="form-group">
+                                <label>Points pour cette question</label>
+                                <input type="number" name="points[]" class="form-control" required min="0" step="0.5" value="1">
                             </div>
 
-                            <button type="button" class="btn btn-danger btn-sm mt-2" onclick="removeQuestion(this)">Supprimer cette question</button>
+                            <button type="button" class="btn btn-danger btn-sm mt-2" onclick="removeQuestion(this)">
+                                Supprimer cette question
+                            </button>
                         </div>
                     </div>
 
-                    <button type="button" class="btn btn-sm btn-secondary mt-3" onclick="addQuestion()">Ajouter une autre question</button>
-                    <button type="submit" class="btn btn-primary mt-3">Ajouter les questions</button>
+                    <button type="button" class="btn btn-secondary mb-3" onclick="addQuestion()">
+                        Ajouter une autre question
+                    </button>
+
+                    <button type="submit" class="btn btn-primary">Enregistrer toutes les questions</button>
                 </form>
             </div>
         </div>
@@ -221,113 +220,124 @@
 </div>
 
 <script>
-    // Fonction pour ajouter une nouvelle question
+    // Afficher les messages de succès/erreur
+    @if(Session::has('success'))
+        alert("{{ Session::get('success') }}");
+    @endif
+
+    @if(Session::has('error'))
+        alert("{{ Session::get('error') }}");
+    @endif
+
     let questionCount = 1;
 
     function addQuestion() {
-        const questionsContainer = document.getElementById('questionsContainer');
+        const container = document.getElementById('questions-container');
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question-group mb-4 border p-3';
         
-        // Créer une nouvelle question
-        const newQuestion = document.createElement('div');
-        newQuestion.classList.add('question-group');
-        
-        // Ajouter la question selon le type de la question précédente (ou un type par défaut)
-        const questionType = 'qcm'; // Par défaut 'qcm'
-        newQuestion.innerHTML = `
+        questionDiv.innerHTML = `
             <div class="form-group">
-                <label for="questionType">Type de question</label>
-                <select name="question_type[]" class="form-control question-type" required onchange="toggleQuestionType(this)">
-                    <option value="qcm" ${questionType === 'qcm' ? 'selected' : ''}>QCM</option>
-                    <option value="open" ${questionType === 'open' ? 'selected' : ''}>Question ouverte</option>
+                <label>Question</label>
+                <textarea name="exam_question[]" class="form-control" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Type de question</label>
+                <select name="question_type[]" class="form-control question-type-select" onchange="toggleQuestionType(this)">
+                    <option value="qcm">QCM</option>
+                    <option value="open">Question ouverte</option>
                 </select>
             </div>
 
-            <div class="form-group">
-                <label for="examQuestion">Question</label>
-                <input type="text" name="exam_question[]" class="form-control" required>
-            </div>
-
-            <!-- Champs pour QCM -->
-            <div class="qcm-fields" style="${questionType === 'qcm' ? '' : 'display: none;'}">
-                <div class="qcm-choices">
-                    <div class="form-group qcm-choice">
-                        <label>Choix 1</label>
+            <div class="qcm-options">
+                <div class="choices-container">
+                    <div class="choice-group mb-2">
                         <div class="input-group">
-                            <input type="text" name="exam_ch[${questionCount}][]" class="form-control" required>
+                            <input type="text" name="choices[${questionCount}][]" class="form-control" placeholder="Option 1">
                             <div class="input-group-append">
                                 <div class="input-group-text">
-                                    <input type="checkbox" name="correct_answer[${questionCount}][]" value="0"> Correct
+                                    <input type="checkbox" name="correct_answers[${questionCount}][]" value="0"> Correct
                                 </div>
-                            </div>
-                            <div class="input-group-append">
-                                <button type="button" class="btn btn-danger btn-sm" onclick="removeQcmChoice(this)">Supprimer</button>
                             </div>
                         </div>
                     </div>
                 </div>
-                <button type="button" class="btn btn-sm btn-secondary" onclick="addQcmChoice(this)">Ajouter un choix</button>
+                <button type="button" class="btn btn-secondary btn-sm mt-2" onclick="addChoice(this)">
+                    Ajouter une option
+                </button>
             </div>
 
-            <!-- Champ pour question ouverte -->
-            <div class="open-question-field" style="${questionType === 'open' ? '' : 'display: none;'}">
-                <div class="form-group">
-                    <label>Réponse attendue</label>
-                    <textarea name="open_answer[]" class="form-control"></textarea>
-                </div>
+            <div class="form-group">
+                <label>Points pour cette question</label>
+                <input type="number" name="points[]" class="form-control" required min="0" step="0.5" value="1">
             </div>
 
-            <button type="button" class="btn btn-danger btn-sm mt-2" onclick="removeQuestion(this)">Supprimer cette question</button>
+            <button type="button" class="btn btn-danger btn-sm mt-2" onclick="removeQuestion(this)">
+                Supprimer cette question
+            </button>
         `;
         
-        // Ajouter la nouvelle question au conteneur
-        questionsContainer.appendChild(newQuestion);
+        container.appendChild(questionDiv);
         questionCount++;
     }
 
-
-    // Fonction pour ajouter un choix QCM
-    function addQcmChoice(button) {
-        const qcmChoices = button.closest('.qcm-fields').querySelector('.qcm-choices');
-        const choiceCount = qcmChoices.querySelectorAll('.qcm-choice').length;
-        const newChoice = document.createElement('div');
-        newChoice.classList.add('form-group', 'qcm-choice');
-        newChoice.innerHTML = `
-            <label>Choix ${choiceCount + 1}</label>
+    function addChoice(button) {
+        const choicesContainer = button.previousElementSibling;
+        const questionGroup = button.closest('.question-group');
+        const questionIndex = Array.from(questionGroup.parentNode.children).indexOf(questionGroup);
+        const choiceCount = choicesContainer.children.length;
+        
+        const choiceDiv = document.createElement('div');
+        choiceDiv.className = 'choice-group mb-2';
+        choiceDiv.innerHTML = `
             <div class="input-group">
-                <input type="text" name="exam_ch[${questionCount - 1}][]" class="form-control" required>
+                <input type="text" name="choices[${questionIndex}][]" class="form-control" placeholder="Option ${choiceCount + 1}">
                 <div class="input-group-append">
                     <div class="input-group-text">
-                        <input type="checkbox" name="correct_answer[${questionCount - 1}][]" value="${choiceCount}"> Correct
+                        <input type="checkbox" name="correct_answers[${questionIndex}][]" value="${choiceCount}"> Correct
                     </div>
-                </div>
-                <div class="input-group-append">
-                    <button type="button" class="btn btn-danger btn-sm" onclick="removeQcmChoice(this)">Supprimer</button>
+                    <button type="button" class="btn btn-danger" onclick="removeChoice(this)">×</button>
                 </div>
             </div>
         `;
-        qcmChoices.appendChild(newChoice);
+        
+        choicesContainer.appendChild(choiceDiv);
     }
 
-    // Fonction pour supprimer un choix QCM
-    function removeQcmChoice(button) {
-        const choiceDiv = button.closest('.qcm-choice');
-        choiceDiv.remove();
+    function removeChoice(button) {
+        button.closest('.choice-group').remove();
     }
 
-    // Fonction pour supprimer une question
     function removeQuestion(button) {
-        const questionDiv = button.closest('.question-group');
-        questionDiv.remove();
+        button.closest('.question-group').remove();
     }
 
-    // Fonction pour basculer entre QCM et question ouverte
     function toggleQuestionType(select) {
-        const questionDiv = select.closest('.question-group');
-        const questionType = select.value;
-        const qcmFields = questionDiv.querySelector('.qcm-fields');
-        const openQuestionField = questionDiv.querySelector('.open-question-field');
-        qcmFields.style.display = (questionType === 'qcm' ? '' : 'none');
-        openQuestionField.style.display = (questionType === 'open' ? '' : 'none');
+        const questionGroup = select.closest('.question-group');
+        const qcmOptions = questionGroup.querySelector('.qcm-options');
+        
+        if (select.value === 'qcm') {
+            qcmOptions.style.display = 'block';
+        } else {
+            qcmOptions.style.display = 'none';
+        }
     }
 </script>
+
+<style>
+    .question-group {
+        background-color: #f8f9fa;
+        border-radius: 5px;
+    }
+    
+    .choice-group {
+        position: relative;
+    }
+    
+    .input-group-append .btn-danger {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+</style>
 @endsection

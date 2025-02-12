@@ -12,18 +12,19 @@ class Question extends Model
         'examen_id',
         'exam_question',
         'question_type',
+        'open_answer'
     ];
 
     // Relation avec le modèle Examen
     public function examen()
     {
-        return $this->belongsTo(Examen::class);
+        return $this->belongsTo(Examen::class, 'examen_id');
     }
 
-    // Relation avec le modèle Choice
+    // Relation avec le modèle QuestionChoice
     public function choices()
     {
-        return $this->hasMany(Choice::class);
+        return $this->hasMany(QuestionChoice::class);
     }
 }
 

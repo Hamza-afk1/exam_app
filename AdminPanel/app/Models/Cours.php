@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,10 +10,14 @@ class Cours extends Model
     use HasFactory;
 
     // Define any necessary relationships, fillable fields, etc.
-    protected $fillable = ['name', 'description'];  // Add your actual fields
+    protected $fillable = [
+        'titre',
+        'description'
+    ];
+    protected $table = 'cours'; // or 'courses' depending on your table name
 
     public function examens()
     {
-        return $this->hasMany(Examen::class);
+        return $this->hasMany(Examen::class, 'cou_id');
     }
 }

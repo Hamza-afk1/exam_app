@@ -12,14 +12,14 @@ class Examen extends Model
     protected $fillable = [
         'titre',
         'groupe_id',
+        'cou_id',
         'description',
         'temps_limite',
-        'question_limit',
-        'cou_id', // Assuming this is the foreign key for the course
+        'question_limit'
     ];
 
     // Define the relationship with the Cours model
-    public function course()
+    public function cours()
     {
         return $this->belongsTo(Cours::class, 'cou_id');
     }
@@ -33,6 +33,6 @@ class Examen extends Model
     // Define the relationship with the Question model
     public function questions()
     {
-        return $this->hasMany(Question::class);
+        return $this->hasMany(Question::class, 'examen_id');
     }
 }
