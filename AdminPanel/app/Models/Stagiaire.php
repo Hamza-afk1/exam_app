@@ -2,23 +2,25 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
 
-class Stagiaire extends Model
+class Stagiaire extends Authenticatable
 {
-    use HasFactory;
+    use Notifiable;
 
     protected $fillable = [
-        'nom',
-        'prenom',
+        'name',
         'email',
         'password',
-        'groupe'
+        'groupe_id',
+        // ... other fillable fields
     ];
 
+    // Define the relationship with Groupe
     public function groupe()
     {
-        return $this->belongsTo(Groupe::class, 'groupe', 'nom');  // Relation basée sur le nom du groupe
+        return $this->belongsTo(Groupe::class, 'groupe_id');
     }
 }

@@ -2,10 +2,44 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 
-class Formateur extends Model
+class Formateur extends Authenticatable
 {
-    protected $table = 'formateurs';  // Make sure the table name matches the one in the DB
-    protected $guarded = [];
+    use Notifiable;
+
+    protected $fillable = [
+        'name',
+        'prenom',
+        'email',
+        'password',
+        'role',
+        'picture'
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    protected $attributes = [
+        'role' => 'formateur',
+    ];
+
+    public function groupes()
+    {
+        return $this->hasMany(Groupe::class, 'formateur_id');
+    }
+
+    public function cours()
+    {
+        return $this->hasMany(Cours::class, 'formateur_id');
+    }
+
+    public function examens()
+    {
+        return $this->hasManyThrough(Examen::class, Groupe::class);
+    }
 }

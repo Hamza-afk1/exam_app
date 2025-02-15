@@ -27,12 +27,16 @@ class Examen extends Model
     // Define the relationship with the Groupe model
     public function groupe()
     {
-        return $this->belongsTo(Groupe::class);
+        return $this->belongsTo(Groupe::class, 'groupe_id');
     }
 
     // Define the relationship with the Question model
     public function questions()
     {
         return $this->hasMany(Question::class, 'examen_id');
+    }
+    public function formateur()
+    {
+        return $this->belongsTo(Formateur::class);
     }
 }

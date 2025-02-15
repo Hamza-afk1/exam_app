@@ -7,6 +7,9 @@ use App\Http\Controllers\ExamenController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CoursController; 
 use App\Http\Controllers\GroupeController; 
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Auth;
 
 
 
@@ -24,6 +27,102 @@ use App\Http\Controllers\GroupeController;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::resource('users', UserController::class);
+
+
+// Admin routes
+Route::middleware(['auth:admin', 'checkRole:admin'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    // Other admin routes...
+});
+
+// Formateur routes
+Route::middleware(['formateur.auth'])->group(function () {
+    Route::get('/formateur/dashboard', [FormateurController::class, 'dashboard'])
+         ->name('formateur.dashboard');
+    Route::get('/formateur/debug', function() {
+        $formateur = Auth::guard('formateur')->user();
+        dd([
+            'formateur' => $formateur,
+            'groups' => $formateur->groupes()->get(),
+            'courses' => $formateur->cours()->get(),
+            'auth_check' => Auth::guard('formateur')->check()
+        ]);
+    });
+    // ... other formateur routes ...
+});
+   
+
+    Route::middleware(['web'])->group(function () {
+        
+        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    });
+
+Route::middleware(['auth:admin,formateur'])->group(function () {
+     // Dashboard
+     Route::get('/dashboard', [FormateurController::class, 'dashboard'])->name('formateur.dashboard');
+        
+     // Profile
+     Route::get('/profile', [FormateurController::class, 'profile'])->name('formateur.profile');
+     Route::put('/profile/update', [FormateurController::class, 'updateProfile'])->name('formateur.profile.update');
+     
+  // Logout
+  Route::post('/logout', [FormateurController::class, 'logout'])->name('formateur.logout');
+  
+    // Cours routes
+    Route::get('/cours', [CoursController::class, 'index'])->name('cours.index');
+    Route::post('/cours', [CoursController::class, 'store'])->name('cours.store');
+    Route::get('/cours/create', [CoursController::class, 'create'])->name('cours.create');
+    Route::put('/cours/{cours}', [CoursController::class, 'update'])->name('cours.update');
+    Route::delete('/cours/{cours}', [CoursController::class, 'destroy'])->name('cours.destroy');
+
+    // Groupes routes
+    Route::get('/groupes', [GroupeController::class, 'index'])->name('groupes.index');
+    Route::post('/groupes', [GroupeController::class, 'store'])->name('groupes.store');
+    Route::get('/groupes/create', [GroupeController::class, 'create'])->name('groupes.create');
+    Route::put('/groupes/{groupe}', [GroupeController::class, 'update'])->name('groupes.update');
+    Route::delete('/groupes/{groupe}', [GroupeController::class, 'destroy'])->name('groupes.destroy');
+
+    // Examens routes
+    Route::get('/examens', [ExamenController::class, 'index'])->name('examens.index');
+    Route::post('/examens', [ExamenController::class, 'store'])->name('examens.store');
+    Route::get('/examens/create', [ExamenController::class, 'create'])->name('examens.create');
+    Route::get('/examens/{examen}/edit', [ExamenController::class, 'edit'])->name('examens.edit');
+    Route::put('/examens/{examen}', [ExamenController::class, 'update'])->name('examens.update');
+    Route::delete('/examens/{examen}', [ExamenController::class, 'destroy'])->name('examens.destroy');
+    Route::get('/examens/corrections', [ExamenController::class, 'corrections'])->name('examens.corrections.list');
+
+    // Stagiaires routes
+    Route::get('/stagiaires', [StagiaireController::class, 'index'])->name('stagiaire.index');
+    Route::post('/stagiaires', [StagiaireController::class, 'store'])->name('stagiaire.store');
+    Route::get('/stagiaires/create', [StagiaireController::class, 'create'])->name('stagiaire.create');
+    Route::put('/stagiaires/{stagiaire}', [StagiaireController::class, 'update'])->name('stagiaire.update');
+    Route::delete('/stagiaires/{stagiaire}', [StagiaireController::class, 'destroy'])->name('stagiaire.destroy');
+});
+
+// Stagiaire routes
+Route::middleware(['auth:stagiaire', 'checkRole:stagiaire'])->prefix('stagiaire')->group(function () {
+    Route::get('/dashboard', [StagiaireController::class, 'dashboard'])->name('stagiaire.dashboard');
+    // Other stagiaire routes...
+});
+Route::middleware(['auth:stagiaire', 'checkRole:stagiaire'])->group(function () {
+    Route::prefix('stagiaire')->group(function () {
+        Route::get('/dashboard', [StagiaireController::class, 'dashboard'])->name('stagiaire.dashboard');
+        Route::get('/profile', [StagiaireController::class, 'profile'])->name('stagiaire.profile');
+        Route::get('/examens', [StagiaireController::class, 'examens'])->name('stagiaire.examens');
+        Route::get('/cours', [StagiaireController::class, 'cours'])->name('stagiaire.cours');
+        // Add all other stagiaire submenu routes here
+    });
+});
+// Auth routes
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::post('/admin/logout', [AuthController::class, 'logout'])->name('admin.logout');
+
+
+
 Route::resource('groupes', GroupeController::class);
 Route::resource('stagiaires', StagiaireController::class);
 

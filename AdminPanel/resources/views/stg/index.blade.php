@@ -78,6 +78,7 @@
                                         <th>Name</th>
                                         <th>Prenom</th>
                                         <th>Groupe</th>
+                                        <th>Role</th>  <!-- Added Role column -->
                                         <th>Email</th>
                                         <th>Created At</th>
                                         <th>Actions</th>
@@ -96,6 +97,11 @@
                                             <td>{{ $stagiaire->name }}</td>
                                             <td>{{ $stagiaire ->prenom }}</td>
                                             <td>{{ $stagiaire->groupe }}</td>
+                                            <td>
+                        <span class="badge badge-info">
+                            {{ ucfirst($stagiaire->role) }}
+                        </span>
+                    </td>
                                             <td>{{ $stagiaire->email }}</td>
                                             <td>{{ \Carbon\Carbon::parse($stagiaire->created_at)->toDateString() }}</td>
                                             <td>

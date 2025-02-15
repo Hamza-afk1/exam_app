@@ -10,12 +10,16 @@ use Illuminate\Support\Facades\Hash;
 
 class StagiaireController extends Controller
 {
+    public function dashboard()
+    {
+        return view('stagiaire.dashboard');
+    }
     // Display a listing of the stagiaires
     public function index()
 {
     $stagiaires = Stagiaire::all();
     $groupes = Groupe::orderBy('nom')->get();
-    return view('stagiaire.index', compact('stagiaires', 'groupes')); // Changé de 'stagiaires.index' à 'stagiaire.index'
+    return view('stg.index', compact('stagiaires', 'groupes')); // Changé de 'stagiaires.index' à 'stagiaire.index'
 }
     // Store a newly created stagiaire in storage
     public function store(Request $request)

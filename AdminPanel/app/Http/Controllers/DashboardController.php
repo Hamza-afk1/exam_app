@@ -15,25 +15,30 @@ class DashboardController extends Controller
     public function index()
     {
         try {
-            // Get counts directly using DB to ensure we're getting data
-            $totalFormateurs = DB::table('formateurs')->count();
-            $totalStagiaires = DB::table('stagiaires')->count();
-            $totalUsers = DB::table('users')->count();
-            $totalGroups = DB::table('groupes')->count();
+            // Get counts using Eloquent
+            $totalFormateurs = Formateur::count();
+            $totalStagiaires = Stagiaire::count();
+            $totalUsers = User::count();
+            $totalGroups = Groupe::count();
 
-            // Log the counts for debugging
+            // Get groups with their stagiaire counts
+            $groupes = Groupe::withCount('stagiaires')->get();
+
+            // Log the counts and relationship data for debugging
             \Log::info('Dashboard counts:', [
                 'formateurs' => $totalFormateurs,
                 'stagiaires' => $totalStagiaires,
                 'users' => $totalUsers,
-                'groups' => $totalGroups
+                'groups' => $totalGroups,
+                'groupe_counts' => $groupes->pluck('stagiaires_count', 'name')
             ]);
 
             return view('Admin.dashboard', compact(
                 'totalFormateurs',
                 'totalStagiaires',
                 'totalUsers',
-                'totalGroups'
+                'totalGroups',
+                'groupes'
             ));
 
         } catch (\Exception $e) {

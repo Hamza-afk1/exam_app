@@ -97,5 +97,34 @@
         </div>
     </div>
 
-    
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Groups and Their Stagiaires</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Group Name</th>
+                                    <th>Number of Stagiaires</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($groupes as $groupe)
+                                <tr>
+                                    <td>{{ $groupe->name }}</td>
+                                    <td>{{ $groupe->stagiaires_count }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
